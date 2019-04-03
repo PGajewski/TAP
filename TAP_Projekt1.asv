@@ -22,30 +22,25 @@ Ts = 0.1;
 
 %punkt pracy, skok tylko wartosci FH, skok tylko wartosci FC, skok obu wartosci 
 FH=[0, 20;
-    300, 22;
-    900, 24];
+    300, 30];
 
-FC=[0, 32;
-    600, 34;
-    900, 36];
+FC=[0,32];
 
 FD = [0, 9];
 
 TD = [0, 30];
 
-x_0 = [54 35];
-
 sim_time = 1200;
-[t1,x1,y1] = objectSimulation(FH,FC,FD,TD,0,tau_C, 0, tau, THp, TCp, TDp, sim_time, x_0);
+[t1,x1,y1] = objectSimulation(FH,FC,FD,TD,0,tau_C, 0, tau, THp, TCp, sim_time, [Tp, hp]);
 
-figure;
+figure(1);
 plot(t1,x1);
-legend('h','T');
+legend('T','h');
 title('Przebieg zmiennych stanu (symulacja)');
 
-figure;
+figure(2);
 plot(t1,y1);
-legend('T_out')
+legend('T_{out}','h')
 title('Przebieg wyjscia obiektu (symulacja)');
 
 %Obliczanie transmitancji
@@ -115,29 +110,81 @@ eval(['G1(2,3)=',G]);
 G=char(G24);
 eval(['G1(2,4)=',G]);
 
-%Dodanie opóŸnienia na wyjœciu.
 for k=1:4
     [num,den]=tfdata(G1(1,k));  %dodanie opoznienia do transmitancji GTi
-    G1(1,k) = tf(num,den,'OutputDelay',tau);
+    G1(1,k) = tf(num,den,'InputDelay',tau);
 end
 
-%Dodanie opoznienia do transmitancji GxFC
-for k=1:2
-    G1(k,2) = tf(num,den,'InputDelay',(tau_C));
-end
+[num,den]=tfdata(G1(1,2));  %dodanie opoznienia do transmitancji GTFC
+G1(1,2) = tf(num,den,'InputDelay',(tau+tau_C));
+[num,den]=tfdata(G1(2,2));  %dodanie opoznienia do transmitancji GhFC
+G1(2,2) = tf(num,den,'InputDelay',tau_C);
 
-%Przeprowadzenie symulacji
-[t2,x2,y2] = linearSimulation(FH, FC, FD, TD, G1, Ts, sim_time, x_0);
+sys1 = ss(A,B,C,D,'InputDelay',[0,tau_C,0,0],'OutputDelay',[tau,0]);
 
+FH=[0, 0;
+    300, 10];
+
+FC=[0, 0];
+
+FD = [0, 0];
+
+TD = [0, 0];
+
+%przeprowadzenie symulacji
+figure;
+% %Dodanie opoznienia do transmitancji GxFC
+% [num,den]=tfdata(G1);  %dodanie opoznienia do transmitancji GTi
+% G = tf(num, den,'InputDelay',[0 tau_C, 0,0],'OutputDelay',[tau,0]);
+% 
+% %Przeprowadzenie symulacji
+% sys_con = ss(A,B,C,D,'InputDelay',[0 tau_C, 0,0],'OutputDelay',[tau,0]);
+% plot(t2,y2+ones(length(y2),2).*[Tp hp],t1',y1');
+
+
+
+% 
 %% punkt 1
 %% podpunkt c)
 % Transmitancja dyskretna
-G2 = c2d(G1, Ts, 'zoh');
+%G2 = c2d(G1, Ts, 'zoh');
+%sys_discrete = c2d(sys_con,Ts,'zoh');
+%[t3,x3,y3] = linearSimulation(FH,FC,FD,TD, sys_discrete, Ts, sim_time, [Tp, hp]);
 
-[t3,x3,y3] = linearSimulation(FH,FC,FD,TD, G2, Ts, sim_time, x_0)
+%% Symulacje;
+sim_time = 800;
+FH=[0, 20;
+    100 30];
+
+FC=[0,32];
+
+FD = [0, 9];
+
+TD = [0, 30];
+
+delta_FH=[0, 0;
+          100, 10];
+
+delta_FC=[0,0];
+
+delta_FD = [0, 0];
+
+delta_TD = [0, 0];
+
+[t11,x11,y11] = objectSimulation(FH,FC,FD,TD,0,tau_C, 0, tau, THp, TCp, sim_time, [Tp, hp]);
+[t12,x12,y12] = linearSimulation(delta_FH,delta_FC,delta_FD,delta_TD,sys1, Ts, sim_time, [0, 0]);
+
+[t21,x21,y21] = objectSimulation(FH- [0 FHp; 0 FHp],FC*2,FD*2,TD*2,0,tau_C, 0, tau, THp, TCp, sim_time, [Tp, hp]);
+[t22,x22,y22] = linearSimulation(delta_FH*2,delta_FC*2,delta_FD*2,delta_TD*2,sys1, Ts, sim_time, [0, 0]);
+
+[t31,x31,y31] = objectSimulation(FH*3,FC*3,FD*3,TD*3,0,tau_C, 0, tau, THp, TCp, sim_time, [Tp, hp]);
+[t32,x32,y32] = linearSimulation(delta_FH*3,delta_FC*3,delta_FD*3,delta_TD*3,sys1, Ts, sim_time, [0, 0]);
+
 
 %% Rysowanie wykresów
-% 
-figure;
-plot(
+% Porównanie zmiennych stanu.
+figure(3);
+plot(t11,y11(1,:),'r-',t12,y12(:,1)+ones(1,length(y12))*Tp,'b-',t21,y21(1,:),'r-',t22,y22(:,1)+ones(1,length(y22))*Tp,'b-',t31,y31(1,:),'r-',t32,y32(:,1)+ones(1,length(y32))*Tp,'b-');
+legend('T nieliniowe','T zlinearyzowane');
+title('Porownanie wyjœcia obiektu - temperatura');
 

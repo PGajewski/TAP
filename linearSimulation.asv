@@ -36,8 +36,8 @@ FD = [FD_with_time;[sim_time,FD_with_time(end,2)]];
 TD = [TD_with_time;[sim_time,TD_with_time(end,2)]];
 
 t = 0:Ts:sim_time;
-values = zeros(length(t),4);
-values(1,:) = [FH_with_time(1,2),FC_with_time(1,2),FD_with_time(1,2),TD_with_time(1,2)];
+values = zeros(lensim_time,FH_with_time(end,2gth(t),4);
+values(1,:) = [
 % Merge all changing signal variable into one (ugly version).
 for i=1:length(t)
 % Main simulation.
@@ -48,28 +48,28 @@ for i=1:length(t)
     actual_FD = 0;
     actual_TD = 0;
     %Increase counters.
-    if (actual_time >= FH(counter_FH,1)) && (counter_FH ~= FH_length)
+    if (actual_time >= (FH(counter_FH,1)+tau_H)) && (counter_FH ~= FH_length)
         actual_FH = FH(counter_FH,2);
         counter_FH = counter_FH + 1;
     else
         actual_FH = FH(counter_FH-1,2);
     end
 
-    if (actual_time >= FC(counter_FC,1)) && (counter_FC ~= FC_length)
+    if (actual_time >= (FC(counter_FC,1)+tau_C)) && (counter_FC ~= FC_length)
         actual_FC = FC(counter_FC,2);
         counter_FC = counter_FC + 1;
     else
         actual_FC = FC(counter_FC-1,2);
     end
 
-    if (actual_time >= FD(counter_FD,1)) && (counter_FD ~= FD_length)
+    if (actual_time >= (FD(counter_FD,1)+tau_D)) && (counter_FD ~= FD_length)
         actual_FD = FD(counter_FD,2);
         counter_FD = counter_FD + 1;
     else
         actual_FD = FD(counter_FD-1,2);
     end
 
-    if (actual_time >= TD(counter_TD,1)) && (counter_TD ~= TD_length)
+    if (actual_time >= (TD(counter_TD,1)+tau_D)) && (counter_TD ~= TD_length)
         actual_TD = TD(counter_TD,2);
         counter_TD = counter_TD + 1;
     else
