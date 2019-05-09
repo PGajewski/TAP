@@ -20,6 +20,9 @@ assert((isvector(x_0) && length(x_0) == 2),'Init condition must be a vector with
 %Check last value change moment timestep.
 assert((FH_with_time(end,1)<=sim_time) && (FC_with_time(end,1)<=sim_time) && (FD_with_time(end,1)<=sim_time) && (TD_with_time(end,1)<=sim_time),'One or more value changes is outside simulation range!');
 
+%Prepare ODE options.
+options = odeset('RelTol',1e-8,'AbsTol',1e-10);
+
 %Add simulation end to changes moments.
 FH = [FH_with_time;[sim_time,FH_with_time(end,2)]];
 FC = [FC_with_time;[sim_time,FC_with_time(end,2)]];
@@ -48,28 +51,28 @@ while 1
     actual_FD = 0;
     actual_TD = 0;
     %Increase counters.
-    if (actual_time >= (FH(counter_FH,1)+tau_H)) && (counter_FH ~= FH_length)
+    if (actual_time ~= tau_H) && (actual_time >= (FH(counter_FH,1)+tau_H)) && (counter_FH ~= FH_length)
         actual_FH = FH(counter_FH,2);
         counter_FH = counter_FH + 1;
     else
         actual_FH = FH(counter_FH-1,2);
     end
 
-    if (actual_time >= (FC(counter_FC,1)+tau_C)) && (counter_FC ~= FC_length)
+    if (actual_time ~= tau_C) && (actual_time >= (FC(counter_FC,1)+tau_C)) && (counter_FC ~= FC_length)
         actual_FC = FC(counter_FC,2);
         counter_FC = counter_FC + 1;
     else
         actual_FC = FC(counter_FC-1,2);
     end
 
-    if (actual_time >= (FD(counter_FD,1)+tau_D)) && (counter_FD ~= FD_length)
+    if (actual_time ~= tau_D) && (actual_time >= (FD(counter_FD,1)+tau_D)) && (counter_FD ~= FD_length)
         actual_FD = FD(counter_FD,2);
         counter_FD = counter_FD + 1;
     else
         actual_FD = FD(counter_FD-1,2);
     end
 
-    if (actual_time >= (TD(counter_TD,1)+tau_D)) && (counter_TD ~= TD_length)
+    if (actual_time ~= tau_D) && (actual_time >= (TD(counter_TD,1)+tau_D)) && (counter_TD ~= TD_length)
         actual_TD = TD(counter_TD,2);
         counter_TD = counter_TD + 1;
     else
@@ -82,7 +85,7 @@ while 1
         break;
     end
      %Find minimal time.
-    actual_time = min([(FH(counter_FH,1) + tau_H) (FC(counter_FC,1) + tau_C) (FD(counter_FD,1) + tau_D) (TD(counter_FD,1) + tau_D)]);
+    actual_time = min([(FH(counter_FH,1) + tau_H) (FC(counter_FC,1) + tau_C) (FD(counter_FD,1) + tau_D) (TD(counter_TD,1) + tau_D)]);
 end
 
 % Main simulation.
@@ -90,18 +93,19 @@ x = [];
 t = [];
 
 s = size(values_with_time);
+init_values = x_0;
 % Simulate by all changes moments.
 for i=1:(s(2)-1)
-    stateHandler = @(t,x) stateFunction(t,x,values_with_time(2,i), values_with_time(3,i), values_with_time(4,i), TH, TC, values_with_time(5,1));
-    [temp1,temp2]=ode45(stateHandler,[values_with_time(1,i) values_with_time(1,i+1)],x_0);
+    stateHandler = @(t,x) stateFunction(t,x,values_with_time(2,i), values_with_time(3,i), values_with_time(4,i), TH, TC, values_with_time(5,i));
+    [temp1,temp2]=ode45(stateHandler,[values_with_time(1,i) values_with_time(1,i+1)],init_values, options);
     t = [t temp1(1:end-1,:)'];
     x = [x temp2(1:end-1,:)'];
     % Remember previous state for next step.
-    x_0 = temp2(end,:);
+    init_values = temp2(end,:);
 end
 
 t =[t sim_time];
-x =[x x_0'];
+x =[x init_values'];
 process_length = length(t);
 
 %Count output.

@@ -1,0 +1,36 @@
+function plotErrorFunction(t1,y1,t2,y2,title,legend1,legend2)
+%plotErrorFunction Function to plot diference between two vectors.
+%   Detailed explanation goes here
+temp1 = size(t1);
+temp2 = size(t2);
+temp3 = size(y1);
+temp4 = size(y2);
+
+assert((temp1 == temp3 && temp2 == temp4),'Incompatible vectors length!');
+assert((isstring(title) && isstring(legend1) && isstring(legend2)),'Expected string value.'); 
+
+values = [];
+counter_y1 = 1;
+counter_y2 = 1;
+actual_time = 0;
+while counter
+    if t1(counter_y1) == t2(counter_y1)
+        values = [values y2(counter_y2) - y1(counter_y1)];
+        if counter_y1 == tem2(1) || counter_y2 == tem4(1)
+            break;
+        end
+        counter_y1 = counter_y1 + 1;
+        counter_y2 = counter_y2 + 1;
+    elseif t1(counter_y1) > t2(counter_y2)
+       
+        counter_y2 = counter_y2 + 1;  
+    else
+       if counter_y1 == tem2(1)
+            break;
+       end
+        counter_y1 = counter_y1 + 1; 
+    end
+
+end
+end
+
