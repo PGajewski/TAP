@@ -8,11 +8,11 @@ function [M,CtAt,CtV]=MPCSmatrices(A,B,C,N,Nu)
 X=eye(nx); Xa=A;
 M1=C*B; CtAt=C*A; CtV=C;
 for i=2:N
-Xa=A*Xa;
-CtAt=[CtAt;C*Xa];
-X=eye(nx)+A*X;
-M1=[M1; C*X*B];
-CtV=[CtV;C*X];
+    Xa=A*Xa;
+    CtAt=[CtAt;C*Xa];
+    X=eye(nx)+A*X;
+    M1=[M1; C*X*B];
+    CtV=[CtV;C*X];
 end
 %macierz dynamiczna M (wykorzystanie struktury macierzy Toeplitza):
 M=M1;
