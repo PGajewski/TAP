@@ -86,7 +86,7 @@ U=zeros(Nu*nu,sim_len);
 y=zeros(ny,sim_len);
 x=zeros(nx,sim_len);
 v=zeros(nx,sim_len);
-y_zad=[zeros(ny,1000),ones(ny,sim_len-1000)];
+y_zad=[zeros(ny,1000),[ones(1,sim_len-1000); zeros(1,sim_len-1000)]];
 %y_zad=[zeros(ny,1000),zeros(ny,sim_len-1000)];
 FD = ones(1,sim_len)*FDp;
 TD = ones(1,sim_len)*TDp;
@@ -156,8 +156,17 @@ end
 
 figure(1);
 stairs(1:sim_len-N, Tout(1:sim_len-N));
+hold on;
+stairs(1:sim_len-N, y_zad(1,1:sim_len-N)+Tp);
+title('Numerical MPCS - temperature');
+xlabel('k')
+ylabel('temperature T [C degrees]');
 
 figure(2);
 stairs(1:sim_len-N, h(1:sim_len-N));
-
+hold on;
+stairs(1:sim_len-N, y_zad(2,1:sim_len-N)+hp);
+title('Numerical MPCS - height');
+xlabel('k')
+ylabel('height [cm]');
 
